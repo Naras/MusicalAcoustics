@@ -1,0 +1,398 @@
+/* Stylesheet for Raga Synthesizer - Dark Glassmorphism vs Classical Acoustic */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans+Kannada:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap');
+
+:root {
+    --transition-speed: 0.3s;
+}
+
+/* --- THEME 1: SLEEK DARK GLASSMORPHISM --- */
+.theme-dark-glass {
+    --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #1e1b4b 100%);
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --card-border: rgba(255, 255, 255, 0.1);
+    --card-blur: blur(16px);
+    --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+    --text-accent: #06b6d4; /* Neon cyan */
+    --text-highlight: #a855f7; /* Purple */
+    
+    --btn-primary-bg: linear-gradient(90deg, #06b6d4, #3b82f6);
+    --btn-primary-text: #ffffff;
+    --btn-secondary-bg: rgba(255, 255, 255, 0.08);
+    --btn-secondary-text: #f3f4f6;
+    --btn-accent-bg: linear-gradient(90deg, #ec4899, #8b5cf6);
+    --btn-accent-text: #ffffff;
+    
+    --swara-btn-bg: rgba(255, 255, 255, 0.07);
+    --swara-btn-text: #f3f4f6;
+    --swara-btn-border: rgba(255, 255, 255, 0.1);
+    --swara-btn-hover: rgba(6, 182, 212, 0.2);
+    --swara-btn-active-bg: rgba(6, 182, 212, 0.3);
+    --swara-btn-active-border: #06b6d4;
+    
+    --font-heading: 'Outfit', 'Inter', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    
+    --visualizer-color: #06b6d4;
+    --visualizer-glow: rgba(6, 182, 212, 0.5);
+    --visualizer-bg: rgba(17, 24, 39, 0.6);
+}
+
+/* --- THEME 2: CLASSICAL WARM ACOUSTIC --- */
+.theme-classical-acoustic {
+    --bg-gradient: linear-gradient(135deg, #f2ece0 0%, #e6dcc8 100%);
+    --card-bg: #fcfaf2;
+    --card-border: #d4c8b3;
+    --card-blur: none;
+    --shadow: 0 10px 25px rgba(67, 56, 42, 0.15);
+    
+    --text-primary: #3d2f20; /* Deep walnut */
+    --text-secondary: #705e4c;
+    --text-accent: #b08244; /* Brass/Gold */
+    --text-highlight: #8c2d19; /* Burgundy */
+    
+    --btn-primary-bg: #8c2d19;
+    --btn-primary-text: #fcfaf2;
+    --btn-secondary-bg: #e6dcc8;
+    --btn-secondary-text: #3d2f20;
+    --btn-accent-bg: #b08244;
+    --btn-accent-text: #fcfaf2;
+    
+    --swara-btn-bg: #ffffff;
+    --swara-btn-text: #3d2f20;
+    --swara-btn-border: #d4c8b3;
+    --swara-btn-hover: #f5eedf;
+    --swara-btn-active-bg: #f2e2cb;
+    --swara-btn-active-border: #b08244;
+    
+    --font-heading: 'Playfair Display', 'Georgia', serif;
+    --font-body: 'Georgia', 'Playfair Display', serif;
+    
+    --visualizer-color: #8c2d19;
+    --visualizer-glow: rgba(140, 45, 25, 0.2);
+    --visualizer-bg: #f5eedf;
+}
+
+/* --- CORE APP STYLING --- */
+.app-container {
+    min-height: 100vh;
+    background: var(--bg-gradient);
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    padding: 30px 15px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+.main-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: var(--card-blur);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 25px;
+    width: 100%;
+    max-width: 650px;
+    transition: all var(--transition-speed) ease;
+}
+
+h1, h2, h3, h4, h5 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 15px 0;
+}
+
+.theme-classical-acoustic h1, 
+.theme-classical-acoustic h2, 
+.theme-classical-acoustic h3 {
+    font-weight: 600;
+    font-style: italic;
+}
+
+/* --- WIDGET & FORM CONTROLS --- */
+.control-group {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+.theme-dark-glass .control-group {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.theme-toggle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 12px;
+}
+
+/* --- SLIDERS --- */
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+.slider-label {
+    min-width: 110px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+input[type="range"] {
+    flex-grow: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--card-border);
+    outline: none;
+    -webkit-appearance: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-accent);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.1s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.number-input {
+    width: 65px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-weight: 700;
+    text-align: center;
+    font-size: 1rem;
+}
+
+/* --- TOGGLE BUTTONS --- */
+.toggle-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+.toggle-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: all var(--transition-speed) ease;
+}
+.toggle-btn:hover {
+    border-color: var(--text-accent);
+    background: var(--swara-btn-hover);
+}
+.toggle-btn.active {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    border-color: transparent;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* --- RAGA DATA PANEL --- */
+.raga-card {
+    background: linear-gradient(135deg, rgba(30, 60, 114, 0.2), rgba(42, 82, 152, 0.2));
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.theme-classical-acoustic .raga-card {
+    background: #f6efe2;
+    border-color: #d8cdb4;
+}
+
+.raga-title {
+    color: var(--text-accent);
+    font-size: 1.35rem;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 8px;
+    font-weight: 700;
+}
+.theme-classical-acoustic .raga-title {
+    color: var(--text-highlight);
+}
+
+.raga-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.raga-table td {
+    padding: 6px 0;
+    font-size: 0.95rem;
+}
+.raga-table td:first-child {
+    font-weight: 600;
+    color: var(--text-secondary);
+    width: 35%;
+}
+
+.scale-box {
+    margin-top: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 4px solid var(--text-accent);
+    border-radius: 0 8px 8px 0;
+    padding: 12px;
+}
+.theme-classical-acoustic .scale-box {
+    background: rgba(0, 0, 0, 0.02);
+    border-left-color: var(--text-highlight);
+}
+
+.scale-row {
+    margin-bottom: 6px;
+    font-size: 0.92rem;
+}
+.scale-row:last-child {
+    margin-bottom: 0;
+}
+.scale-swaras {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-left: 8px;
+}
+
+/* --- SWARA KEYBOARD --- */
+.swara-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+.swara-key {
+    min-width: 65px;
+    height: 50px;
+    border-radius: 8px;
+    border: 1px solid var(--swara-btn-border);
+    background: var(--swara-btn-bg);
+    color: var(--swara-btn-text);
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all var(--transition-speed) ease;
+}
+.swara-key:hover {
+    background: var(--swara-btn-hover);
+    border-color: var(--text-accent);
+}
+.swara-key:active {
+    background: var(--swara-btn-active-bg);
+    border-color: var(--swara-btn-active-border);
+}
+.swara-key.high-sa {
+    background: var(--swara-btn-active-bg);
+    color: var(--text-accent);
+    border-color: var(--text-accent);
+}
+
+/* --- SCALE SEQUENCER & RANDOM GENERATOR --- */
+.action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.action-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all var(--transition-speed) ease;
+}
+.action-btn.primary {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+}
+.action-btn.primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+.action-btn.secondary {
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+    border: 1px solid var(--card-border);
+}
+.action-btn.secondary:hover {
+    background: var(--swara-btn-hover);
+}
+.action-btn.accent {
+    background: var(--btn-accent-bg);
+    color: var(--btn-accent-text);
+}
+.action-btn.accent:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* --- CANVAS VISUALIZER --- */
+.visualizer-container {
+    margin-top: 15px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--visualizer-bg);
+    border: 1px solid var(--card-border);
+    height: 100px;
+    position: relative;
+}
+.visualizer-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* --- AUDIO OUTPUT TEXT --- */
+.output-text-panel {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px dashed var(--card-border);
+    min-height: 80px;
+    font-family: monospace;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+.theme-dark-glass .output-text-panel {
+    background: rgba(255, 255, 255, 0.02);
+}
+.output-prompt {
+    color: var(--text-accent);
+    font-weight: 700;
+}
+.theme-classical-acoustic .output-prompt {
+    color: var(--text-highlight);
+}

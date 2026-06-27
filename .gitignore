@@ -1,0 +1,26 @@
+# Logs
+raga_synth_app/logs
+raga_synth_app/*.log
+raga_synth_app/npm-debug.log*
+raga_synth_app/yarn-debug.log*
+raga_synth_app/yarn-error.log*
+raga_synth_app/pnpm-debug.log*
+raga_synth_app/lerna-debug.log*
+
+raga_synth_app/node_modules
+raga_synth_app/dist
+raga_synth_app/dist-ssr
+raga_synth_app/*.local
+raga_synth_app/package-lock.json
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.csv
