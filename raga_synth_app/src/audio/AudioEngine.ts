@@ -390,10 +390,77 @@ function synthVeena(freq: number, duration: number, sr: number): Float32Array {
     return output;
 }
 
+// Global cache for loaded voice buffers (stored with their decoded sample rates)
+export interface VoiceBuffer {
+    samples: Float32Array;
+    sampleRate: number;
+}
+export const voiceBuffers: Record<string, VoiceBuffer> = {};
+
 // Master synthesizer router
-export function generateAudioSamples(inst: string, freq: number, duration: number, sr: number = 22050): Float32Array {
+export function generateAudioSamples(inst: string, freq: number, duration: number, sr: number = 22050, swara?: string): Float32Array {
     let samples: Float32Array;
-    if (inst === 'Piano') {
+    if (inst === 'Voice (Teacher)' || inst === 'Voice (Student)') {
+        const voice = inst === 'Voice (Teacher)' ? 'teacher' : 'student';
+        const swaraSym = swara ? swara.replace(/[⁺⁻\s]/g, '') : 'S';
+        
+        let noteKey = 'sa';
+        let naturalFreq = 145.0;
+        const voiceFreq = freq / 2.0; // Voice octave translation matching notebook
+        
+        if (swaraSym === 'S') {
+            if (voiceFreq > 190.0) {
+                noteKey = 'sa2';
+                naturalFreq = 290.0;
+            } else {
+                noteKey = 'sa';
+                naturalFreq = 145.0;
+            }
+        } else {
+            const mapping: Record<string, [string, number]> = {
+                'R₁': ['ri1', 153.62], 'R₂': ['ri1', 153.62], 'R₃': ['ri1', 153.62],
+                'G₁': ['ga3', 182.69], 'G₂': ['ga3', 182.69], 'G₃': ['ga3', 182.69],
+                'M₁': ['ma1', 193.55], 'M₂': ['ma1', 193.55],
+                'P':  ['pa', 217.27],
+                'D₁': ['da1', 230.19], 'D₂': ['da1', 230.19], 'D₃': ['da1', 230.19],
+                'N₁': ['ni3', 273.68], 'N₂': ['ni3', 273.68], 'N₃': ['ni3', 273.68]
+            };
+            const pair = mapping[swaraSym] || ['sa', 145.0];
+            noteKey = pair[0];
+            naturalFreq = pair[1];
+        }
+        
+        const key = `${voice}_${noteKey}`;
+        const voiceBuffer = voiceBuffers[key];
+        
+        if (voiceBuffer && voiceBuffer.samples.length > 0) {
+            const inputSamples = voiceBuffer.samples;
+            const ratio = (voiceFreq / naturalFreq) * (voiceBuffer.sampleRate / sr);
+            const targetLen = Math.floor(sr * duration);
+            samples = new Float32Array(targetLen);
+            
+            // Linear interpolation resampling
+            for (let i = 0; i < targetLen; i++) {
+                const pos = i * ratio;
+                const idx = Math.floor(pos);
+                const frac = pos - idx;
+                if (idx >= inputSamples.length - 1) {
+                    break;
+                }
+                samples[i] = (1.0 - frac) * inputSamples[idx] + frac * inputSamples[idx + 1];
+            }
+            
+            // Apply linear decay envelope at the end to prevent clicks
+            const fadeLen = Math.min(1100, Math.floor(samples.length / 10));
+            for (let i = 0; i < fadeLen; i++) {
+                const idx = samples.length - fadeLen + i;
+                samples[idx] *= (fadeLen - i) / fadeLen;
+            }
+        } else {
+            // Fallback to piano if sample is not loaded yet
+            samples = synthPiano(freq, duration, sr);
+        }
+    } else if (inst === 'Piano') {
         samples = synthPiano(freq, duration, sr);
     } else if (inst === 'Violin') {
         samples = synthViolin(freq, duration, sr);
