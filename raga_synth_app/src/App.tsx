@@ -37,37 +37,47 @@ export default function App() {
     if (voiceSamplesLoadedRef.current) return;
     voiceSamplesLoadedRef.current = true;
 
+    const octFolders = ['low', 'mid', 'high'];
     const voices = ['teacher', 'student'];
     const notes = ['sa', 'ri1', 'ga3', 'ma1', 'pa', 'da1', 'ni3', 'sa2'];
 
-    setOutputText(prev => prev + '\nLoading vocal sample database (Teacher & Student)...');
+    setOutputText(prev => prev + '\nLoading multi-octave vocal sample database (Teacher & Student: Low, Mid, High)...');
 
     const promises: Promise<void>[] = [];
 
-    for (const voice of voices) {
-      for (const note of notes) {
-        const key = `${voice}_${note}`;
-        const url = `${import.meta.env.BASE_URL}audio/${voice}_${note}.wav`;
+    for (const octFolder of octFolders) {
+      for (const voice of voices) {
+        for (const note of notes) {
+          const key = `${voice}_${octFolder}_${note}`;
+          const url = `${import.meta.env.BASE_URL}audio/${octFolder}/${voice}_${note}.wav`;
 
-        promises.push(
-          loadSample(ctx, url)
-            .then(buffer => {
-              const channelData = buffer.getChannelData(0);
-              voiceBuffers[key] = {
-                samples: channelData,
-                sampleRate: buffer.sampleRate
-              };
-            })
-            .catch(err => {
-              console.error(`Failed to load vocal sample: ${url}`, err);
-            })
-        );
+          promises.push(
+            loadSample(ctx, url)
+              .then(buffer => {
+                const channelData = buffer.getChannelData(0);
+                voiceBuffers[key] = {
+                  samples: channelData,
+                  sampleRate: buffer.sampleRate
+                };
+                if (octFolder === 'mid') {
+                  // Compatibility fallback key
+                  voiceBuffers[`${voice}_${note}`] = {
+                    samples: channelData,
+                    sampleRate: buffer.sampleRate
+                  };
+                }
+              })
+              .catch(err => {
+                console.error(`Failed to load vocal sample: ${url}`, err);
+              })
+          );
+        }
       }
     }
 
     try {
       await Promise.all(promises);
-      setOutputText(prev => prev + '\nVocal sample database loaded successfully!');
+      setOutputText(prev => prev + '\nMulti-octave vocal database loaded successfully!');
     } catch (err) {
       console.error('Failed to load some vocal samples:', err);
     }
@@ -182,7 +192,7 @@ interface PlayingNote {
 
     // Generate a long buffer for persistent holding
     const maxHoldDuration = 10.0;
-    const samples = generateAudioSamples(instrument, freq, maxHoldDuration, 22050, swara);
+    const samples = generateAudioSamples(instrument, freq, maxHoldDuration, 22050, swara, playOctave);
 
     const buffer = ctx.createBuffer(1, samples.length, 22050);
     buffer.getChannelData(0).set(samples);
@@ -286,7 +296,7 @@ interface PlayingNote {
 
       const noteSignals = seq.map(item => {
         const freq = getSwaraFrequency(item.s, item.oct);
-        return generateAudioSamples(instrument, freq, duration, sr, item.s);
+        return generateAudioSamples(instrument, freq, duration, sr, item.s, item.oct);
       });
       const combined = concatenateArrays(noteSignals);
       playSamples(combined);
@@ -304,9 +314,9 @@ interface PlayingNote {
 
       const silence = new Float32Array(Math.floor(sr * 0.4)); // 0.4s pause
 
-      const sigAro = concatenateArrays(seqAro.map(item => generateAudioSamples(instrument, getSwaraFrequency(item.s, item.oct), duration, sr, item.s)));
-      const sigAvar = concatenateArrays(seqAvar.map(item => generateAudioSamples(instrument, getSwaraFrequency(item.s, item.oct), duration, sr, item.s)));
-      const sigComb = concatenateArrays(seqComb.map(item => generateAudioSamples(instrument, getSwaraFrequency(item.s, item.oct), duration, sr, item.s)));
+      const sigAro = concatenateArrays(seqAro.map(item => generateAudioSamples(instrument, getSwaraFrequency(item.s, item.oct), duration, sr, item.s, item.oct)));
+      const sigAvar = concatenateArrays(seqAvar.map(item => generateAudioSamples(instrument, getSwaraFrequency(item.s, item.oct), duration, sr, item.s, item.oct)));
+      const sigComb = concatenateArrays(seqComb.map(item => generateAudioSamples(instrument, getSwaraFrequency(item.s, item.oct), duration, sr, item.s, item.oct)));
 
       const combined = concatenateArrays([sigAro, silence, sigAvar, silence, sigComb]);
       playSamples(combined);
@@ -338,7 +348,7 @@ interface PlayingNote {
     const sr = 22050;
     const noteSignals = seq.map(item => {
       const freq = getSwaraFrequency(item.s, item.oct);
-      return generateAudioSamples(instrument, freq, duration, sr, item.s);
+      return generateAudioSamples(instrument, freq, duration, sr, item.s, item.oct);
     });
     const combined = concatenateArrays(noteSignals);
     playSamples(combined);

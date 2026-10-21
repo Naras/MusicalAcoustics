@@ -398,40 +398,107 @@ export interface VoiceBuffer {
 export const voiceBuffers: Record<string, VoiceBuffer> = {};
 
 // Master synthesizer router
-export function generateAudioSamples(inst: string, freq: number, duration: number, sr: number = 22050, swara?: string): Float32Array {
+export function generateAudioSamples(
+    inst: string,
+    freq: number,
+    duration: number,
+    sr: number = 22050,
+    swara?: string,
+    octave?: number
+): Float32Array {
     let samples: Float32Array;
     if (inst === 'Voice (Teacher)' || inst === 'Voice (Student)') {
         const voice = inst === 'Voice (Teacher)' ? 'teacher' : 'student';
         const swaraSym = swara ? swara.replace(/[⁺⁻\s]/g, '') : 'S';
         
-        let noteKey = 'sa';
-        let naturalFreq = 145.0;
         const voiceFreq = freq / 2.0; // Voice octave translation matching notebook
         
-        if (swaraSym === 'S') {
-            if (voiceFreq > 190.0) {
-                noteKey = 'sa2';
-                naturalFreq = 290.0;
-            } else {
-                noteKey = 'sa';
-                naturalFreq = 145.0;
-            }
+        // Determine octave register
+        let octFolder = 'mid';
+        if (octave !== undefined && octave !== null) {
+            if (octave <= 3) octFolder = 'low';
+            else if (octave >= 5) octFolder = 'high';
+            else octFolder = 'mid';
         } else {
-            const mapping: Record<string, [string, number]> = {
-                'R₁': ['ri1', 153.62], 'R₂': ['ri1', 153.62], 'R₃': ['ri1', 153.62],
-                'G₁': ['ga3', 182.69], 'G₂': ['ga3', 182.69], 'G₃': ['ga3', 182.69],
-                'M₁': ['ma1', 193.55], 'M₂': ['ma1', 193.55],
-                'P':  ['pa', 217.27],
-                'D₁': ['da1', 230.19], 'D₂': ['da1', 230.19], 'D₃': ['da1', 230.19],
-                'N₁': ['ni3', 273.68], 'N₂': ['ni3', 273.68], 'N₃': ['ni3', 273.68]
-            };
-            const pair = mapping[swaraSym] || ['sa', 145.0];
-            noteKey = pair[0];
-            naturalFreq = pair[1];
+            if (voiceFreq < 100.0) octFolder = 'low';
+            else if (voiceFreq > 200.0) octFolder = 'high';
+            else octFolder = 'mid';
         }
         
-        const key = `${voice}_${noteKey}`;
-        const voiceBuffer = voiceBuffers[key];
+        let noteKey = 'sa';
+        let naturalFreq = 145.0;
+        
+        if (octFolder === 'low') {
+            if (swaraSym === 'S') {
+                if (voiceFreq > 100.0) { // Top Sa of low scale (Middle Sa)
+                    noteKey = 'sa';
+                    naturalFreq = 145.0;
+                } else { // Mandra Sa
+                    noteKey = 'sa2';
+                    naturalFreq = 72.5;
+                }
+            } else {
+                const mappingLow: Record<string, [string, number]> = {
+                    'R₁': ['ri1', 76.81], 'R₂': ['ri1', 76.81], 'R₃': ['ri1', 76.81],
+                    'G₁': ['ga3', 91.34], 'G₂': ['ga3', 91.34], 'G₃': ['ga3', 91.34],
+                    'M₁': ['ma1', 96.77], 'M₂': ['ma1', 96.77],
+                    'P':  ['pa',  108.63],
+                    'D₁': ['da1', 115.09], 'D₂': ['da1', 115.09], 'D₃': ['da1', 115.09],
+                    'N₁': ['ni3', 136.84], 'N₂': ['ni3', 136.84], 'N₃': ['ni3', 136.84]
+                };
+                const pair = mappingLow[swaraSym] || ['sa2', 72.5];
+                noteKey = pair[0];
+                naturalFreq = pair[1];
+            }
+        } else if (octFolder === 'high') {
+            if (swaraSym === 'S') {
+                if (voiceFreq > 380.0) { // Upper Sa of high scale (Ati-tara Sa)
+                    noteKey = 'sa2';
+                    naturalFreq = 580.0;
+                } else { // Tara Sa
+                    noteKey = 'sa';
+                    naturalFreq = 290.0;
+                }
+            } else {
+                const mappingHigh: Record<string, [string, number]> = {
+                    'R₁': ['ri1', 307.24], 'R₂': ['ri1', 307.24], 'R₃': ['ri1', 307.24],
+                    'G₁': ['ga3', 365.37], 'G₂': ['ga3', 365.37], 'G₃': ['ga3', 365.37],
+                    'M₁': ['ma1', 387.10], 'M₂': ['ma1', 387.10],
+                    'P':  ['pa',  434.54],
+                    'D₁': ['da1', 460.37], 'D₂': ['da1', 460.37], 'D₃': ['da1', 460.37],
+                    'N₁': ['ni3', 547.36], 'N₂': ['ni3', 547.36], 'N₃': ['ni3', 547.36]
+                };
+                const pair = mappingHigh[swaraSym] || ['sa', 290.0];
+                noteKey = pair[0];
+                naturalFreq = pair[1];
+            }
+        } else { // 'mid'
+            if (swaraSym === 'S') {
+                if (voiceFreq > 190.0) {
+                    noteKey = 'sa2';
+                    naturalFreq = 290.0;
+                } else {
+                    noteKey = 'sa';
+                    naturalFreq = 145.0;
+                }
+            } else {
+                const mappingMid: Record<string, [string, number]> = {
+                    'R₁': ['ri1', 153.62], 'R₂': ['ri1', 153.62], 'R₃': ['ri1', 153.62],
+                    'G₁': ['ga3', 182.69], 'G₂': ['ga3', 182.69], 'G₃': ['ga3', 182.69],
+                    'M₁': ['ma1', 193.55], 'M₂': ['ma1', 193.55],
+                    'P':  ['pa',  217.27],
+                    'D₁': ['da1', 230.19], 'D₂': ['da1', 230.19], 'D₃': ['da1', 230.19],
+                    'N₁': ['ni3', 273.68], 'N₂': ['ni3', 273.68], 'N₃': ['ni3', 273.68]
+                };
+                const pair = mappingMid[swaraSym] || ['sa', 145.0];
+                noteKey = pair[0];
+                naturalFreq = pair[1];
+            }
+        }
+        
+        const primaryKey = `${voice}_${octFolder}_${noteKey}`;
+        const fallbackKey = `${voice}_${noteKey}`;
+        const voiceBuffer = voiceBuffers[primaryKey] || voiceBuffers[fallbackKey];
         
         if (voiceBuffer && voiceBuffer.samples.length > 0) {
             const inputSamples = voiceBuffer.samples;
